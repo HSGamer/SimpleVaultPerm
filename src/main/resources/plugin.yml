@@ -1,0 +1,7 @@
+name: SimpleVaultPerm
+version: ${project.version}
+main: me.hsgamer.simplevaultperm.SimpleVaultPerm
+api-version: 1.13
+softdepend:
+  - Vault
+authors: [ HSGamer ]
