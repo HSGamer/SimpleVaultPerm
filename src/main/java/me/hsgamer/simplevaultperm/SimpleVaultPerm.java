@@ -3,12 +3,15 @@ package me.hsgamer.simplevaultperm;
 import me.hsgamer.hscore.bukkit.baseplugin.BasePlugin;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.command.*;
+import me.hsgamer.simplevaultperm.config.ChatConfig;
 import me.hsgamer.simplevaultperm.config.GroupConfig;
 import me.hsgamer.simplevaultperm.config.MainConfig;
 import me.hsgamer.simplevaultperm.config.UserConfig;
+import me.hsgamer.simplevaultperm.hook.VaultChatHook;
 import me.hsgamer.simplevaultperm.hook.VaultPermissionHook;
 import me.hsgamer.simplevaultperm.listener.PlayerListener;
 import me.hsgamer.simplevaultperm.manager.PermissionManager;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -17,6 +20,7 @@ public final class SimpleVaultPerm extends BasePlugin {
     private final MainConfig mainConfig = new MainConfig(this);
     private final GroupConfig groupConfig = new GroupConfig(this);
     private final UserConfig userConfig = new UserConfig(this);
+    private final ChatConfig chatConfig = new ChatConfig(this);
     private final PermissionManager permissionManager = new PermissionManager(this);
 
     @Override
@@ -29,6 +33,7 @@ public final class SimpleVaultPerm extends BasePlugin {
         mainConfig.setup();
         groupConfig.setup();
         userConfig.setup();
+        chatConfig.setup();
         registerListener(new PlayerListener(this));
 
         registerCommand(new AddGroupCommand(this));
@@ -42,9 +47,17 @@ public final class SimpleVaultPerm extends BasePlugin {
         registerCommand(new PlayerPermInfoCommand(this));
 
         if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+            VaultPermissionHook permissionHook = new VaultPermissionHook(this);
+            VaultChatHook chatHook = new VaultChatHook(this, permissionHook);
             getServer().getServicesManager().register(
                     Permission.class,
-                    new VaultPermissionHook(this),
+                    permissionHook,
+                    this,
+                    ServicePriority.High
+            );
+            getServer().getServicesManager().register(
+                    Chat.class,
+                    chatHook,
                     this,
                     ServicePriority.High
             );
@@ -71,6 +84,10 @@ public final class SimpleVaultPerm extends BasePlugin {
 
     public UserConfig getUserConfig() {
         return userConfig;
+    }
+
+    public ChatConfig getChatConfig() {
+        return chatConfig;
     }
 
     public PermissionManager getPermissionManager() {

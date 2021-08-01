@@ -34,6 +34,8 @@ public class PlayerPermInfoCommand extends AdminCommand {
         MessageUtils.sendMessage(sender, "&eGroups");
         plugin.getUserConfig().getGroups(player).forEach(group -> MessageUtils.sendMessage(sender, "  &f" + group));
 
+        MessageUtils.sendMessage(sender, "&ePrefix: &f" + plugin.getChatConfig().getPlayerPrefix(player));
+        MessageUtils.sendMessage(sender, "&eSuffix: &f" + plugin.getChatConfig().getPlayerSuffix(player));
         return true;
     }
 

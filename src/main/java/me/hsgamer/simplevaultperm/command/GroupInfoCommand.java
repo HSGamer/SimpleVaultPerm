@@ -23,12 +23,14 @@ public class GroupInfoCommand extends AdminCommand {
             MessageUtils.sendMessage(sender, getUsage());
             return false;
         }
-        Map<String, Boolean> permissionMap = plugin.getGroupConfig().getPermissionMap(args[0]);
-        if (permissionMap.isEmpty()) {
-            MessageUtils.sendMessage(sender, "&cNo permissions here");
-        } else {
-            permissionMap.forEach((k, v) -> MessageUtils.sendMessage(sender, "&f" + k + "&7: &b" + v));
-        }
+        String group = args[0];
+        Map<String, Boolean> permissionMap = plugin.getGroupConfig().getPermissionMap(group);
+
+        MessageUtils.sendMessage(sender, "&ePermissions");
+        permissionMap.forEach((k, v) -> MessageUtils.sendMessage(sender, "  &f" + k + "&7: &b" + v));
+
+        MessageUtils.sendMessage(sender, "&ePrefix: &f" + plugin.getChatConfig().getGroupPrefix(group));
+        MessageUtils.sendMessage(sender, "&eSuffix: &f" + plugin.getChatConfig().getGroupSuffix(group));
         return true;
     }
 

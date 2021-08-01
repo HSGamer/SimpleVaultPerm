@@ -31,7 +31,10 @@ public class GroupConfig extends BukkitConfig {
 
     public boolean getPermissionState(String group, String permission) {
         String path = formatPath(group, permission);
-        return getInstance(path, false, Boolean.class);
+        if (contains(path)) {
+            return getInstance(path, false, Boolean.class);
+        }
+        return getInstance(formatPath(MainConfig.DEFAULT_GROUP.getValue(), permission), false, Boolean.class);
     }
 
     public Map<String, Boolean> getPermissionMap(String group) {

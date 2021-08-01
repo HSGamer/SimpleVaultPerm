@@ -88,7 +88,7 @@ public class VaultPermissionHook extends Permission {
     @Override
     public String getPrimaryGroup(String world, String player) {
         String[] groups = getPlayerGroups(world, player);
-        return groups.length > 0 ? groups[0] : MainConfig.DEFAULT_GROUP.getValue();
+        return groups.length > 0 ? groups[groups.length - 1] : MainConfig.DEFAULT_GROUP.getValue();
     }
 
     @Override
