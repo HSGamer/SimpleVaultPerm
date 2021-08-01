@@ -1,6 +1,7 @@
 package me.hsgamer.simplevaultperm;
 
 import me.hsgamer.hscore.bukkit.baseplugin.BasePlugin;
+import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.command.*;
 import me.hsgamer.simplevaultperm.config.GroupConfig;
 import me.hsgamer.simplevaultperm.config.MainConfig;
@@ -17,6 +18,11 @@ public final class SimpleVaultPerm extends BasePlugin {
     private final GroupConfig groupConfig = new GroupConfig(this);
     private final UserConfig userConfig = new UserConfig(this);
     private final PermissionManager permissionManager = new PermissionManager(this);
+
+    @Override
+    public void load() {
+        MessageUtils.setPrefix("&f[&6SimpleVaultPerm&f] &7");
+    }
 
     @Override
     public void enable() {

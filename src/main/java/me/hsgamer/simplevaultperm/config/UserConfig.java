@@ -16,8 +16,8 @@ public class UserConfig extends BukkitConfig {
 
     @Override
     public void setup() {
-        super.setup();
         this.getOriginal().options().pathSeparator('/');
+        super.setup();
     }
 
     private String formatGroupPath(String player) {
