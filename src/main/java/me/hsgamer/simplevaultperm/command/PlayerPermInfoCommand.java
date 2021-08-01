@@ -2,11 +2,14 @@ package me.hsgamer.simplevaultperm.command;
 
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PlayerPermInfoCommand extends AdminCommand {
     private final SimpleVaultPerm plugin;
@@ -37,7 +40,7 @@ public class PlayerPermInfoCommand extends AdminCommand {
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         if (args.length == 1) {
-            return super.tabComplete(sender, alias, args);
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }

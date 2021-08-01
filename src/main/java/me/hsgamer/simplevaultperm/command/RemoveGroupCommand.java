@@ -2,10 +2,13 @@ package me.hsgamer.simplevaultperm.command;
 
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RemoveGroupCommand extends AdminCommand {
     private final SimpleVaultPerm plugin;
@@ -35,7 +38,7 @@ public class RemoveGroupCommand extends AdminCommand {
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         if (args.length == 1) {
-            return super.tabComplete(sender, alias, args);
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
         } else if (args.length == 2) {
             return plugin.getUserConfig().getGroups(args[0]);
         } else {
