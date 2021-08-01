@@ -36,7 +36,7 @@ public class RemoveGroupPermCommand extends AdminCommand {
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         if (args.length == 1) {
-            return super.tabComplete(sender, alias, args);
+            return new ArrayList<>(plugin.getGroupConfig().getGroups());
         } else if (args.length == 2) {
             return new ArrayList<>(plugin.getGroupConfig().getPermissionMap(args[0]).keySet());
         } else {
