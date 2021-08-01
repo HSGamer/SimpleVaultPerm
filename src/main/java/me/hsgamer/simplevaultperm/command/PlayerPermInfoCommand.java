@@ -5,6 +5,7 @@ import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerPermInfoCommand extends AdminCommand {
@@ -31,5 +32,14 @@ public class PlayerPermInfoCommand extends AdminCommand {
         plugin.getUserConfig().getGroups(player).forEach(group -> MessageUtils.sendMessage(sender, "  &f" + group));
 
         return true;
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+        if (args.length == 1) {
+            return super.tabComplete(sender, alias, args);
+        } else {
+            return Collections.emptyList();
+        }
     }
 }
