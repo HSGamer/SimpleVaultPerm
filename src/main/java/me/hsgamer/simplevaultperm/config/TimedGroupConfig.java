@@ -68,13 +68,14 @@ public class TimedGroupConfig {
         if (duration < 0) {
             return false;
         }
+        long time = duration + getCurrentMillis();
         Optional<TimedPlayer> optional = Optional.ofNullable(timedPlayerMap.get(player));
         if (optional.isPresent()) {
             TimedPlayer timedPlayer = optional.get();
-            timedPlayer.timedGroupMap.put(group, duration);
+            timedPlayer.timedGroupMap.put(group, time);
             timedPlayer.needUpdate.set(true);
         } else {
-            config.set(formatGroupPath(player, group), duration);
+            config.set(formatGroupPath(player, group), time);
             config.save();
         }
         return true;
