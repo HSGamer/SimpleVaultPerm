@@ -15,7 +15,7 @@ public class AddGroupCommand extends AdminCommand {
     private final SimpleVaultPerm plugin;
 
     public AddGroupCommand(SimpleVaultPerm plugin) {
-        super("addgroup", "Add a group to a player", "/addgroup <player> <group> [duration]", Collections.emptyList());
+        super("addgroup", "Add a group to a player", "/addgroup <player> <group> [duration] [override]", Collections.emptyList());
         this.plugin = plugin;
     }
 
@@ -30,13 +30,14 @@ public class AddGroupCommand extends AdminCommand {
         long duration = -1;
         if (args.length > 2) {
             try {
-                duration = Long.parseLong(args[2]);
+                duration = Long.parseUnsignedLong(args[2]);
             } catch (Exception e) {
                 // IGNORED
             }
         }
+        boolean override = true;
         if (duration > 0) {
-            if (plugin.getTimedGroupConfig().addGroup(player, group, duration)) {
+            if (plugin.getTimedGroupConfig().addGroup(player, group, duration, override)) {
                 MessageUtils.sendMessage(sender, "&aSuccess");
                 return true;
             } else {

@@ -41,7 +41,7 @@ public class TimedGroupConfig {
     public void removePlayer(String player) {
         Optional.ofNullable(timedPlayerMap.remove(player))
                 .filter(timedPlayer -> !timedPlayer.isCancelled())
-                .ifPresent(TimedPlayer::cancel);
+                .ifPresent(TimedPlayer::cancelAndSave);
     }
 
     public void clearAllPlayers() {
@@ -64,18 +64,22 @@ public class TimedGroupConfig {
         return player + "." + group;
     }
 
-    public boolean addGroup(String player, String group, long duration) {
+    public boolean addGroup(String player, String group, long duration, boolean override) {
         if (duration < 0) {
             return false;
         }
-        long time = duration + getCurrentMillis();
         Optional<TimedPlayer> optional = Optional.ofNullable(timedPlayerMap.get(player));
         if (optional.isPresent()) {
             TimedPlayer timedPlayer = optional.get();
+            long time = duration;
+            time += override ? getCurrentMillis() : timedPlayer.timedGroupMap.getOrDefault(group, getCurrentMillis());
             timedPlayer.timedGroupMap.put(group, time);
             timedPlayer.needUpdate.set(true);
         } else {
-            config.set(formatGroupPath(player, group), time);
+            String path = formatGroupPath(player, group);
+            long time = duration;
+            time += override ? getCurrentMillis() : config.getInstance(path, getCurrentMillis(), Number.class).longValue();
+            config.set(path, time);
             config.save();
         }
         return true;
@@ -102,7 +106,7 @@ public class TimedGroupConfig {
     }
 
     private class TimedPlayer extends BukkitRunnable {
-        private final Map<String, Long> timedGroupMap = new LinkedHashMap<>();
+        private final Map<String, Long> timedGroupMap = new HashMap<>();
         private final AtomicBoolean needUpdate = new AtomicBoolean();
         private final String player;
 
@@ -125,7 +129,11 @@ public class TimedGroupConfig {
                 needUpdate.set(true);
             }
             if (needUpdate.get()) {
-                config.set(player, timedGroupMap.isEmpty() ? null : timedGroupMap);
+                config.remove(player);
+                if (!timedGroupMap.isEmpty()) {
+                    timedGroupMap.forEach((key, value) -> config.set(formatGroupPath(player, key), value));
+                }
+                config.save();
                 plugin.getPermissionManager().reloadPermissions(player);
                 needUpdate.set(false);
             }
@@ -134,7 +142,15 @@ public class TimedGroupConfig {
         @Override
         public synchronized void cancel() throws IllegalStateException {
             super.cancel();
-            config.set(player, timedGroupMap.isEmpty() ? null : timedGroupMap);
+            config.remove(player);
+            if (!timedGroupMap.isEmpty()) {
+                timedGroupMap.forEach((key, value) -> config.set(formatGroupPath(player, key), value));
+            }
+        }
+
+        public void cancelAndSave() {
+            cancel();
+            config.save();
         }
     }
 }
