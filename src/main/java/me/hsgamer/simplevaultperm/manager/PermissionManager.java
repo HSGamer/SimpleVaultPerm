@@ -8,7 +8,6 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,8 +28,8 @@ public class PermissionManager implements Listener {
     private void addPermissions(String player, PermissionAttachment attachment) {
         String defaultGroup = MainConfig.DEFAULT_GROUP.getValue();
         plugin.getGroupConfig().getPermissionMap(defaultGroup).forEach(attachment::setPermission);
-        List<String> groups = plugin.getUserConfig().getGroups(player);
-        groups.stream().map(plugin.getGroupConfig()::getPermissionMap).forEach(map -> map.forEach(attachment::setPermission));
+        plugin.getUserConfig().getGroups(player).stream().map(plugin.getGroupConfig()::getPermissionMap).forEach(map -> map.forEach(attachment::setPermission));
+        plugin.getTimedGroupConfig().getGroups(player).stream().map(plugin.getGroupConfig()::getPermissionMap).forEach(map -> map.forEach(attachment::setPermission));
         plugin.getUserConfig().getPermissionMap(player).forEach(attachment::setPermission);
     }
 

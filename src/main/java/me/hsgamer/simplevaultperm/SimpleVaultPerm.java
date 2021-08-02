@@ -66,11 +66,15 @@ public final class SimpleVaultPerm extends BasePlugin {
 
     @Override
     public void postEnable() {
-        getServer().getOnlinePlayers().forEach(permissionManager::addPermissions);
+        getServer().getOnlinePlayers().forEach(player -> {
+            permissionManager.addPermissions(player);
+            timedGroupConfig.addPlayer(player);
+        });
     }
 
     @Override
     public void disable() {
+        timedGroupConfig.clearAllPlayers();
         permissionManager.clearAllPermissions();
     }
 
