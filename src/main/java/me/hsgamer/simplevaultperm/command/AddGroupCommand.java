@@ -36,6 +36,9 @@ public class AddGroupCommand extends AdminCommand {
             }
         }
         boolean override = true;
+        if (args.length > 3) {
+            override = Boolean.parseBoolean(args[3]);
+        }
         if (duration > 0) {
             if (plugin.getTimedGroupConfig().addGroup(player, group, duration, override)) {
                 MessageUtils.sendMessage(sender, "&aSuccess");
