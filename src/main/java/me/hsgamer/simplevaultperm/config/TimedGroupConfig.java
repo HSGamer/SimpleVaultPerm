@@ -2,11 +2,13 @@ package me.hsgamer.simplevaultperm.config;
 
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TimedGroupConfig {
     private final Map<String, TimedPlayer> timedPlayerMap = new ConcurrentHashMap<>();
@@ -22,16 +24,22 @@ public class TimedGroupConfig {
         config.setup();
     }
 
+    private static long getCurrentMillis() {
+        return System.currentTimeMillis();
+    }
+
     public void reload() {
+        clearAllPlayers();
         config.reload();
+        Bukkit.getOnlinePlayers().stream().map(Player::getName).forEach(this::addPlayer);
     }
 
-    public void addPlayer(Player player) {
-        timedPlayerMap.put(player.getName(), new TimedPlayer(player.getName()));
+    public void addPlayer(String player) {
+        timedPlayerMap.put(player, new TimedPlayer(player));
     }
 
-    public void removePlayer(Player player) {
-        Optional.ofNullable(timedPlayerMap.remove(player.getName()))
+    public void removePlayer(String player) {
+        Optional.ofNullable(timedPlayerMap.remove(player))
                 .filter(timedPlayer -> !timedPlayer.isCancelled())
                 .ifPresent(TimedPlayer::cancel);
     }
@@ -39,44 +47,93 @@ public class TimedGroupConfig {
     public void clearAllPlayers() {
         timedPlayerMap.values().forEach(TimedPlayer::cancel);
         timedPlayerMap.clear();
-    }
-
-    public Map<String, Long> getTimedGroups(String player) {
-        return Collections.emptyMap();
+        config.save();
     }
 
     public List<String> getGroups(String player) {
         return new ArrayList<>(getTimedGroups(player).keySet());
     }
 
-    public boolean addGroup(String player, String group, long duration) {
+    public Map<String, Long> getTimedGroups(String player) {
+        Map<String, Long> map = new LinkedHashMap<>();
+        config.getNormalizedValues(player, false).forEach((key, value) -> map.put(key, Long.parseUnsignedLong(String.valueOf(value))));
+        return map;
+    }
 
-        plugin.getPermissionManager().reloadPermissions(player);
+    private String formatGroupPath(String player, String group) {
+        return player + "." + group;
+    }
+
+    public boolean addGroup(String player, String group, long duration) {
+        if (duration < 0) {
+            return false;
+        }
+        Optional<TimedPlayer> optional = Optional.ofNullable(timedPlayerMap.get(player));
+        if (optional.isPresent()) {
+            TimedPlayer timedPlayer = optional.get();
+            timedPlayer.timedGroupMap.put(group, duration);
+            timedPlayer.needUpdate.set(true);
+        } else {
+            config.set(formatGroupPath(player, group), duration);
+            config.save();
+        }
         return true;
     }
 
     public boolean removeGroup(String player, String group) {
-
-        plugin.getPermissionManager().reloadPermissions(player);
-        return true;
+        Optional<TimedPlayer> optional = Optional.ofNullable(timedPlayerMap.get(player));
+        if (optional.isPresent()) {
+            TimedPlayer timedPlayer = optional.get();
+            if (timedPlayer.timedGroupMap.containsKey(group)) {
+                timedPlayer.timedGroupMap.remove(group);
+                timedPlayer.needUpdate.set(true);
+                return true;
+            }
+        } else {
+            String path = formatGroupPath(player, group);
+            if (config.contains(path)) {
+                config.remove(path);
+                config.save();
+                return true;
+            }
+        }
+        return false;
     }
 
     private class TimedPlayer extends BukkitRunnable {
-        private final Map<String, Long> timedGroupMap = new HashMap<>();
+        private final Map<String, Long> timedGroupMap = new LinkedHashMap<>();
+        private final AtomicBoolean needUpdate = new AtomicBoolean();
         private final String player;
 
         private TimedPlayer(String player) {
             this.player = player;
+            timedGroupMap.putAll(getTimedGroups(player));
+            boolean async = MainConfig.TIMED_GROUP_CHECK_ASYNC.getValue();
+            long update = MainConfig.TIMED_GROUP_CHECK_PERIOD.getValue();
+            if (async) {
+                runTaskTimerAsynchronously(plugin, update, update);
+            } else {
+                runTaskTimer(plugin, update, update);
+            }
         }
 
         @Override
         public void run() {
-
-            plugin.getPermissionManager().reloadPermissions(player);
+            long currentTime = getCurrentMillis();
+            if (timedGroupMap.entrySet().removeIf(entry -> entry.getValue() < currentTime)) {
+                needUpdate.set(true);
+            }
+            if (needUpdate.get()) {
+                config.set(player, timedGroupMap.isEmpty() ? null : timedGroupMap);
+                plugin.getPermissionManager().reloadPermissions(player);
+                needUpdate.set(false);
+            }
         }
 
-        public Map<String, Long> getTimedGroupMap() {
-            return timedGroupMap;
+        @Override
+        public synchronized void cancel() throws IllegalStateException {
+            super.cancel();
+            config.set(player, timedGroupMap.isEmpty() ? null : timedGroupMap);
         }
     }
 }

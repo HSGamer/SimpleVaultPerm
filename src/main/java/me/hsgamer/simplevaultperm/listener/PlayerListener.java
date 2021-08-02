@@ -15,13 +15,13 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        plugin.getTimedGroupConfig().addPlayer(event.getPlayer());
+        plugin.getTimedGroupConfig().addPlayer(event.getPlayer().getName());
         plugin.getPermissionManager().addPermissions(event.getPlayer());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        plugin.getTimedGroupConfig().removePlayer(event.getPlayer());
+        plugin.getTimedGroupConfig().removePlayer(event.getPlayer().getName());
         plugin.getPermissionManager().removePermissions(event.getPlayer());
     }
 }
