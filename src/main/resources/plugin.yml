@@ -4,4 +4,5 @@ main: me.hsgamer.simplevaultperm.SimpleVaultPerm
 api-version: 1.13
 softdepend:
   - Vault
+  - PlaceholderAPI
 authors: [ HSGamer ]

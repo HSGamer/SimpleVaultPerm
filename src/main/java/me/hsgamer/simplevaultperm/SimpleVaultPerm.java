@@ -4,13 +4,13 @@ import me.hsgamer.hscore.bukkit.baseplugin.BasePlugin;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.command.*;
 import me.hsgamer.simplevaultperm.config.*;
+import me.hsgamer.simplevaultperm.hook.PlaceholderHook;
 import me.hsgamer.simplevaultperm.hook.VaultChatHook;
 import me.hsgamer.simplevaultperm.hook.VaultPermissionHook;
 import me.hsgamer.simplevaultperm.listener.PlayerListener;
 import me.hsgamer.simplevaultperm.manager.PermissionManager;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 
 public final class SimpleVaultPerm extends BasePlugin {
@@ -46,7 +46,7 @@ public final class SimpleVaultPerm extends BasePlugin {
         registerCommand(new GroupInfoCommand(this));
         registerCommand(new PlayerPermInfoCommand(this));
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             VaultPermissionHook permissionHook = new VaultPermissionHook(this);
             VaultChatHook chatHook = new VaultChatHook(this, permissionHook);
             getServer().getServicesManager().register(
@@ -61,6 +61,9 @@ public final class SimpleVaultPerm extends BasePlugin {
                     this,
                     ServicePriority.High
             );
+        }
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderHook(this).register();
         }
     }
 
