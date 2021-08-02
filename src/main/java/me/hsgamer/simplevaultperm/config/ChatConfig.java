@@ -3,6 +3,7 @@ package me.hsgamer.simplevaultperm.config;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +36,8 @@ public class ChatConfig extends BukkitConfig {
         if (contains(playerPath)) {
             return getInstance(playerPath, "", String.class);
         }
-        List<String> groups = plugin.getUserConfig().getGroups(player);
+        List<String> groups = new ArrayList<>(plugin.getUserConfig().getGroups(player));
+        groups.addAll(plugin.getTimedGroupConfig().getGroups(player));
         Collections.reverse(groups);
         for (String group : groups) {
             String groupPath = formatGroupPrefix(group);
@@ -56,7 +58,8 @@ public class ChatConfig extends BukkitConfig {
         if (contains(playerPath)) {
             return getInstance(playerPath, "", String.class);
         }
-        List<String> groups = plugin.getUserConfig().getGroups(player);
+        List<String> groups = new ArrayList<>(plugin.getUserConfig().getGroups(player));
+        groups.addAll(plugin.getTimedGroupConfig().getGroups(player));
         Collections.reverse(groups);
         for (String group : groups) {
             String groupPath = formatGroupSuffix(group);

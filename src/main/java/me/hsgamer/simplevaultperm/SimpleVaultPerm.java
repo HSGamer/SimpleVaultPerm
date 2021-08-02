@@ -3,10 +3,7 @@ package me.hsgamer.simplevaultperm;
 import me.hsgamer.hscore.bukkit.baseplugin.BasePlugin;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.command.*;
-import me.hsgamer.simplevaultperm.config.ChatConfig;
-import me.hsgamer.simplevaultperm.config.GroupConfig;
-import me.hsgamer.simplevaultperm.config.MainConfig;
-import me.hsgamer.simplevaultperm.config.UserConfig;
+import me.hsgamer.simplevaultperm.config.*;
 import me.hsgamer.simplevaultperm.hook.VaultChatHook;
 import me.hsgamer.simplevaultperm.hook.VaultPermissionHook;
 import me.hsgamer.simplevaultperm.listener.PlayerListener;
@@ -21,6 +18,7 @@ public final class SimpleVaultPerm extends BasePlugin {
     private final GroupConfig groupConfig = new GroupConfig(this);
     private final UserConfig userConfig = new UserConfig(this);
     private final ChatConfig chatConfig = new ChatConfig(this);
+    private final TimedGroupConfig timedGroupConfig = new TimedGroupConfig(this);
     private final PermissionManager permissionManager = new PermissionManager(this);
 
     @Override
@@ -34,6 +32,8 @@ public final class SimpleVaultPerm extends BasePlugin {
         groupConfig.setup();
         userConfig.setup();
         chatConfig.setup();
+        timedGroupConfig.setup();
+
         registerListener(new PlayerListener(this));
 
         registerCommand(new AddGroupCommand(this));
@@ -88,6 +88,10 @@ public final class SimpleVaultPerm extends BasePlugin {
 
     public ChatConfig getChatConfig() {
         return chatConfig;
+    }
+
+    public TimedGroupConfig getTimedGroupConfig() {
+        return timedGroupConfig;
     }
 
     public PermissionManager getPermissionManager() {

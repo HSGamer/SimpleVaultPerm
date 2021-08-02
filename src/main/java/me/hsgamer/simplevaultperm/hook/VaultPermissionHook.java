@@ -82,6 +82,7 @@ public class VaultPermissionHook extends Permission {
         Set<String> set = new LinkedHashSet<>();
         set.add(MainConfig.DEFAULT_GROUP.getValue());
         set.addAll(plugin.getUserConfig().getGroups(player));
+        set.addAll(plugin.getTimedGroupConfig().getGroups(player));
         return set.toArray(new String[0]);
     }
 

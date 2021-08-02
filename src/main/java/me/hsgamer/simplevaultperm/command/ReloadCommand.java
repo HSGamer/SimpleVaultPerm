@@ -19,6 +19,8 @@ public class ReloadCommand extends AdminCommand {
         plugin.getMainConfig().reload();
         plugin.getGroupConfig().reload();
         plugin.getUserConfig().reload();
+        plugin.getChatConfig().reload();
+        plugin.getTimedGroupConfig().reload();
         plugin.getPermissionManager().reloadAllPermissions();
         MessageUtils.sendMessage(sender, "&aSuccess");
         return true;

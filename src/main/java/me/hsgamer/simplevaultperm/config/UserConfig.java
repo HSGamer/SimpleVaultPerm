@@ -37,6 +37,10 @@ public class UserConfig extends BukkitConfig {
         if (contains(permissionPath)) {
             return getInstance(permissionPath, false, Boolean.class);
         }
+        List<String> timedGroups = plugin.getTimedGroupConfig().getGroups(player);
+        if (!timedGroups.isEmpty() && timedGroups.parallelStream().anyMatch(group -> plugin.getGroupConfig().getPermissionState(group, permission))) {
+            return true;
+        }
         List<String> groups = getGroups(player);
         if (!groups.isEmpty() && groups.parallelStream().anyMatch(group -> plugin.getGroupConfig().getPermissionState(group, permission))) {
             return true;
