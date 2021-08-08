@@ -96,17 +96,18 @@ public class TimedGroupConfig extends BukkitConfig {
 
     public boolean removeGroup(String player, String group) {
         Optional<TimedPlayer> optional = Optional.ofNullable(timedPlayerMap.get(player));
+        long time = getCurrentTime();
         if (optional.isPresent()) {
             TimedPlayer timedPlayer = optional.get();
-            if (timedPlayer.timedGroupMap.containsKey(group)) {
-                timedPlayer.timedGroupMap.remove(group);
+            if (timedPlayer.timedGroupMap.containsKey(group) && timedPlayer.timedGroupMap.get(group) >= time) {
+                timedPlayer.timedGroupMap.put(group, --time);
                 timedPlayer.needUpdate.set(true);
                 return true;
             }
         } else {
             String path = formatGroupPath(player, group);
-            if (contains(path)) {
-                remove(path);
+            if (contains(path) && getInstance(path, Number.class).longValue() >= time) {
+                set(path, --time);
                 save();
                 return true;
             }
@@ -147,11 +148,7 @@ public class TimedGroupConfig extends BukkitConfig {
                 needUpdate.set(true);
             }
             if (needUpdate.get()) {
-                remove(name);
-                if (!timedGroupMap.isEmpty()) {
-                    timedGroupMap.forEach((key, value) -> set(formatGroupPath(name, key), value));
-                }
-                save();
+                updateConfig(name, true);
                 plugin.getPermissionManager().reloadPermissions(name);
                 needUpdate.set(false);
             }
@@ -160,16 +157,22 @@ public class TimedGroupConfig extends BukkitConfig {
         @Override
         public synchronized void cancel() throws IllegalStateException {
             super.cancel();
-            String name = player.getName();
-            remove(name);
-            if (!timedGroupMap.isEmpty()) {
-                timedGroupMap.forEach((key, value) -> set(formatGroupPath(name, key), value));
-            }
+            updateConfig(player.getName(), false);
         }
 
         public void cancelAndSave() {
             cancel();
             save();
+        }
+
+        private void updateConfig(String name, boolean save) {
+            remove(name);
+            if (!timedGroupMap.isEmpty()) {
+                timedGroupMap.forEach((key, value) -> set(formatGroupPath(name, key), value));
+            }
+            if (save) {
+                save();
+            }
         }
     }
 }
