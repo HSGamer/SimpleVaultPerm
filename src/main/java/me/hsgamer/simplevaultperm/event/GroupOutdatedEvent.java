@@ -20,7 +20,7 @@ public class GroupOutdatedEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
+        return getHandlerList();
     }
 
     public Player getPlayer() {
