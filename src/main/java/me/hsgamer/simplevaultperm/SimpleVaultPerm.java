@@ -70,7 +70,7 @@ public final class SimpleVaultPerm extends BasePlugin {
     @Override
     public void postEnable() {
         getServer().getOnlinePlayers().forEach(player -> {
-            timedGroupConfig.addPlayer(player.getName());
+            timedGroupConfig.addPlayer(player);
             permissionManager.addPermissions(player);
         });
     }
