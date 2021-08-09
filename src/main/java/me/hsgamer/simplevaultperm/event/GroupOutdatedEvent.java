@@ -10,6 +10,7 @@ public class GroupOutdatedEvent extends Event {
     private final String group;
 
     public GroupOutdatedEvent(Player player, String group) {
+        super(true);
         this.player = player;
         this.group = group;
     }
