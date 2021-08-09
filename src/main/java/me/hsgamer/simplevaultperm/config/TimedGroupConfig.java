@@ -141,11 +141,9 @@ public class TimedGroupConfig extends BukkitConfig {
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
             if (!outdatedGroups.isEmpty()) {
-                outdatedGroups.forEach(group -> {
-                    Bukkit.getPluginManager().callEvent(new GroupOutdatedEvent(player, group));
-                    timedGroupMap.remove(group);
-                });
+                outdatedGroups.forEach(timedGroupMap::remove);
                 needUpdate.set(true);
+                outdatedGroups.forEach(group -> Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(new GroupOutdatedEvent(player, group))));
             }
             if (needUpdate.get()) {
                 updateConfig(name, true);
