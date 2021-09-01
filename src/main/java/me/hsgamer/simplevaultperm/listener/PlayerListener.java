@@ -4,7 +4,7 @@ import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
@@ -14,12 +14,10 @@ public class PlayerListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onJoin(PlayerLoginEvent event) {
-        if (event.getResult() == PlayerLoginEvent.Result.ALLOWED) {
-            plugin.getTimedGroupConfig().addPlayer(event.getPlayer());
-            plugin.getPermissionManager().addPermissions(event.getPlayer());
-        }
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJoin(PlayerJoinEvent event) {
+        plugin.getTimedGroupConfig().addPlayer(event.getPlayer());
+        plugin.getPermissionManager().addPermissions(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
