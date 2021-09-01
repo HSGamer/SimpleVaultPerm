@@ -14,7 +14,7 @@ public class PlayerListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerLoginEvent event) {
         if (event.getResult() == PlayerLoginEvent.Result.ALLOWED) {
             plugin.getTimedGroupConfig().addPlayer(event.getPlayer());
@@ -22,7 +22,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onQuit(PlayerQuitEvent event) {
         plugin.getTimedGroupConfig().removePlayer(event.getPlayer());
         plugin.getPermissionManager().removePermissions(event.getPlayer());
