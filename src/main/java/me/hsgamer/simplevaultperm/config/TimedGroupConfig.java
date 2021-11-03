@@ -116,7 +116,7 @@ public class TimedGroupConfig extends BukkitConfig {
     }
 
     private class TimedPlayer extends BukkitRunnable {
-        private final Map<String, Long> timedGroupMap = new HashMap<>();
+        private final Map<String, Long> timedGroupMap = new LinkedHashMap<>();
         private final AtomicBoolean needUpdate = new AtomicBoolean();
         private final Player player;
 
