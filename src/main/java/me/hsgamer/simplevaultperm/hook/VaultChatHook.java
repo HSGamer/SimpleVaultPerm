@@ -66,7 +66,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public int getPlayerInfoInteger(String world, String player, String node, int defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public int getGroupInfoInteger(String world, String group, String node, int defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public double getPlayerInfoDouble(String world, String player, String node, double defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public double getGroupInfoDouble(String world, String group, String node, double defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public boolean getPlayerInfoBoolean(String world, String player, String node, boolean defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public boolean getGroupInfoBoolean(String world, String group, String node, boolean defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -126,7 +126,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public String getPlayerInfoString(String world, String player, String node, String defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
@@ -136,7 +136,7 @@ public class VaultChatHook extends Chat {
 
     @Override
     public String getGroupInfoString(String world, String group, String node, String defaultValue) {
-        throw new UnsupportedOperationException();
+        return defaultValue;
     }
 
     @Override
