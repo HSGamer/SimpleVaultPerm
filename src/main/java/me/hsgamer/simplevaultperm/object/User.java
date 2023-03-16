@@ -113,19 +113,22 @@ public class User {
         }
     }
 
-    public boolean clearExpiredTimedGroups() {
+    /**
+     * Clear the expired timed groups
+     *
+     * @return the list of expired groups
+     */
+    public List<String> clearExpiredTimedGroups() {
         if (timedGroups == null) {
-            return false;
+            return Collections.emptyList();
         }
-        boolean changed = false;
-        Iterator<Map.Entry<String, Long>> iterator = timedGroups.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Long> entry = iterator.next();
-            if (entry.getValue() < System.currentTimeMillis()) {
-                iterator.remove();
-                changed = true;
+        List<String> expiredGroups = new ArrayList<>();
+        timedGroups.forEach((group, time) -> {
+            if (time <= System.currentTimeMillis()) {
+                expiredGroups.add(group);
             }
-        }
-        return changed;
+        });
+        expiredGroups.forEach(timedGroups::remove);
+        return expiredGroups;
     }
 }
