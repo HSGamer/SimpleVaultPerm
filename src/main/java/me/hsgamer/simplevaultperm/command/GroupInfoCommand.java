@@ -29,12 +29,23 @@ public class GroupInfoCommand extends AdminCommand {
         }
 
         Map<String, Boolean> permissionMap = groupObject.getPermissions();
+        String prefix = groupObject.getPrefix();
+        String suffix = groupObject.getSuffix();
+
+        if (permissionMap == null) {
+            permissionMap = Collections.emptyMap();
+        }
+        if (prefix == null) {
+            prefix = "";
+        }
+        if (suffix == null) {
+            suffix = "";
+        }
 
         MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoPermissionTitle());
         permissionMap.forEach((k, v) -> MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoPermissionFormat().replace("{permission}", k).replace("{state}", Boolean.toString(v))));
-
-        MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoPrefix().replace("{prefix}", groupObject.getPrefix()));
-        MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoSuffix().replace("{suffix}", groupObject.getSuffix()));
+        MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoPrefix().replace("{prefix}", prefix));
+        MessageUtils.sendMessage(sender, plugin.getMessageConfig().getGroupInfoSuffix().replace("{suffix}", suffix));
         return true;
     }
 
