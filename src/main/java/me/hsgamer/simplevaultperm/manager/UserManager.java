@@ -38,9 +38,13 @@ public class UserManager {
     public User getUser(UUID uuid, boolean forceUpdate) {
         User user = userMap.computeIfAbsent(uuid, User::new);
         if (forceUpdate) {
-            updateUser(user);
+            updateUser(user, Collections.emptyList());
         }
         return user;
+    }
+
+    public Collection<String> getGroupNames() {
+        return Collections.unmodifiableCollection(groupMap.keySet());
     }
 
     public void setup() {
@@ -82,20 +86,28 @@ public class UserManager {
         save();
     }
 
-    private void updateUser(User user) {
+    private boolean updateUser(User user, List<String> updatedGroups) {
+        List<String> cachedGroups = user.getCachedGroups();
+        if (cachedGroups != null && cachedGroups.stream().anyMatch(updatedGroups::contains)) {
+            user.setUpdateRequire(true);
+        }
+
+        if (!user.isUpdateRequire()) {
+            return false;
+        }
+
+        List<String> finalGroups = new ArrayList<>(user.getFinalGroups());
+        String defaultGroup = plugin.getMainConfig().getDefaultGroup();
+        if (!finalGroups.contains(defaultGroup)) {
+            finalGroups.add(defaultGroup);
+        }
+        user.setCachedGroups(finalGroups);
+
         Map<String, Boolean> finalPermissions = new HashMap<>();
         String finalPrefix = "";
         String finalSuffix = "";
 
-        String defaultGroupName = plugin.getMainConfig().getDefaultGroup();
-        Group defaultGroup = groupMap.get(defaultGroupName);
-        if (defaultGroup != null) {
-            finalPermissions.putAll(defaultGroup.getPermissions());
-            finalPrefix = defaultGroup.getPrefix();
-            finalSuffix = defaultGroup.getSuffix();
-        }
-
-        List<String> userGroups = user.getFinalGroups();
+        List<String> userGroups = user.getCachedGroups();
         for (Map.Entry<String, Group> entry : groupMap.entrySet()) {
             String groupName = entry.getKey();
             Group group = entry.getValue();
@@ -114,9 +126,22 @@ public class UserManager {
             }
         }
 
+        String userPrefix = user.getPrefix();
+        if (userPrefix != null) {
+            finalPrefix = userPrefix;
+        }
+
+        String userSuffix = user.getSuffix();
+        if (userSuffix != null) {
+            finalSuffix = userSuffix;
+        }
+
         user.setCachedPermissions(finalPermissions);
-        user.setPrefix(finalPrefix);
-        user.setSuffix(finalSuffix);
+        user.setCachedPrefix(finalPrefix);
+        user.setCachedSuffix(finalSuffix);
+
+        user.setUpdateRequire(false);
+        return true;
     }
 
     private void onUpdateTick() {
@@ -135,13 +160,7 @@ public class UserManager {
                 user.setUpdateRequire(true);
             }
 
-            if (user.getFinalGroups().stream().anyMatch(updatedGroups::contains)) {
-                user.setUpdateRequire(true);
-            }
-
-            if (user.isUpdateRequire()) {
-                user.setUpdateRequire(false);
-                updateUser(user);
+            if (updateUser(user, updatedGroups)) {
                 user.applyAttachment();
                 updated = true;
             }

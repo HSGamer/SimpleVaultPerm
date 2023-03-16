@@ -13,38 +13,48 @@ import java.util.*;
 @Data
 public class User {
     private final UUID uuid;
-    private final Object lock = new Object();
+    private final Object attachmentLock = new Object();
+    private final Object groupLock = new Object();
+    private final Object permissionLock = new Object();
+    private final Object timedGroupLock = new Object();
 
     // User data
     private List<String> groups;
     private Map<String, Long> timedGroups;
     private Map<String, Boolean> permissions;
+    private String prefix;
+    private String suffix;
 
     // Cached data
     private boolean updateRequire;
     private PermissionAttachment permissionAttachment;
+    private List<String> cachedGroups;
     private Map<String, Boolean> cachedPermissions;
-    private String prefix;
-    private String suffix;
+    private String cachedPrefix;
+    private String cachedSuffix;
 
     public static User fromMap(UUID uuid, Map<String, Object> map) {
         User user = new User(uuid);
         Optional.ofNullable(map.get("groups")).map(CollectionUtils::createStringListFromObject).ifPresent(user::setGroups);
         Optional.ofNullable(map.get("permissions")).map(CollectionUtils::createStringListFromObject).map(ValueUtil::toBooleanMap).ifPresent(user::setPermissions);
         Optional.ofNullable(map.get("timed-groups")).map(ValueUtil::toLongMap).ifPresent(user::setTimedGroups);
+        Optional.ofNullable(map.get("prefix")).map(Objects::toString).ifPresent(user::setPrefix);
+        Optional.ofNullable(map.get("suffix")).map(Objects::toString).ifPresent(user::setSuffix);
         return user;
     }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("groups", groups);
-        map.put("permissions", ValueUtil.toStringList(permissions));
-        map.put("timed-groups", timedGroups);
+        Optional.ofNullable(groups).ifPresent(value -> map.put("groups", value));
+        Optional.ofNullable(permissions).map(ValueUtil::toStringList).ifPresent(value -> map.put("permissions", value));
+        Optional.ofNullable(timedGroups).ifPresent(value -> map.put("timed-groups", value));
+        Optional.ofNullable(prefix).ifPresent(value -> map.put("prefix", value));
+        Optional.ofNullable(suffix).ifPresent(value -> map.put("suffix", value));
         return map;
     }
 
     public void applyAttachment() {
-        synchronized (lock) {
+        synchronized (attachmentLock) {
             if (permissionAttachment != null) {
                 permissionAttachment.remove();
             }
@@ -64,7 +74,7 @@ public class User {
     }
 
     public void removeAttachment() {
-        synchronized (lock) {
+        synchronized (attachmentLock) {
             if (permissionAttachment != null) {
                 permissionAttachment.remove();
                 permissionAttachment = null;
@@ -73,38 +83,73 @@ public class User {
     }
 
     public List<String> getFinalGroups() {
-        List<String> finalGroups = new ArrayList<>(groups);
-        timedGroups.forEach((group, time) -> {
-            if (time > System.currentTimeMillis()) {
-                finalGroups.add(group);
+        List<String> finalGroups;
+        synchronized (groupLock) {
+            finalGroups = new ArrayList<>(groups);
+        }
+        synchronized (timedGroupLock) {
+            if (timedGroups != null) {
+                timedGroups.forEach((group, time) -> {
+                    if (time > System.currentTimeMillis()) {
+                        finalGroups.add(group);
+                    }
+                });
             }
-        });
+        }
         return finalGroups;
     }
 
     public void setPermission(String permission, boolean value) {
-        if (permissions == null) {
-            permissions = new HashMap<>();
+        synchronized (permissionLock) {
+            if (permissions == null) {
+                permissions = new HashMap<>();
+            }
+            permissions.put(permission, value);
         }
-        permissions.put(permission, value);
     }
 
-    public void removePermission(String permission) {
-        if (permissions != null) {
-            permissions.remove(permission);
+    public boolean removePermission(String permission) {
+        synchronized (permissionLock) {
+            if (permissions != null) {
+                return permissions.remove(permission);
+            }
+            return false;
+        }
+    }
+
+    public void addGroup(String group) {
+        synchronized (groupLock) {
+            if (groups == null) {
+                groups = new ArrayList<>();
+            }
+            groups.add(group);
+        }
+    }
+
+    public boolean removeGroup(String group) {
+        synchronized (groupLock) {
+            if (groups != null) {
+                return groups.remove(group);
+            }
+            return false;
         }
     }
 
     public void setTimedGroup(String group, long duration) {
-        if (timedGroups == null) {
-            timedGroups = new HashMap<>();
+        synchronized (timedGroupLock) {
+            if (timedGroups == null) {
+                timedGroups = new HashMap<>();
+            }
+            timedGroups.put(group, System.currentTimeMillis() + duration);
         }
-        timedGroups.put(group, System.currentTimeMillis() + duration);
     }
 
-    public void removeTimedGroup(String group) {
-        if (timedGroups != null) {
-            timedGroups.remove(group);
+    public boolean removeTimedGroup(String group) {
+        synchronized (timedGroupLock) {
+            if (timedGroups != null) {
+                return timedGroups.remove(group) != null;
+            }
+            return false;
         }
     }
 
@@ -114,16 +159,18 @@ public class User {
      * @return the list of expired groups
      */
     public List<String> clearExpiredTimedGroups() {
-        if (timedGroups == null) {
-            return Collections.emptyList();
-        }
-        List<String> expiredGroups = new ArrayList<>();
-        timedGroups.forEach((group, time) -> {
-            if (time <= System.currentTimeMillis()) {
-                expiredGroups.add(group);
+        synchronized (timedGroupLock) {
+            if (timedGroups == null) {
+                return Collections.emptyList();
             }
-        });
-        expiredGroups.forEach(timedGroups::remove);
-        return expiredGroups;
+            List<String> expiredGroups = new ArrayList<>();
+            timedGroups.forEach((group, time) -> {
+                if (time <= System.currentTimeMillis()) {
+                    expiredGroups.add(group);
+                }
+            });
+            expiredGroups.forEach(timedGroups::remove);
+            return expiredGroups;
+        }
     }
 }

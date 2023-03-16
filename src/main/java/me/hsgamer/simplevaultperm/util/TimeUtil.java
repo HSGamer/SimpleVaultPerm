@@ -1,6 +1,7 @@
 package me.hsgamer.simplevaultperm.util;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 @UtilityClass
 public class TimeUtil {
@@ -38,5 +39,9 @@ public class TimeUtil {
             default:
                 return value;
         }
+    }
+
+    public static String displayDuration(long time) {
+        return DurationFormatUtils.formatDuration(time, "HH:mm:ss", true);
     }
 }

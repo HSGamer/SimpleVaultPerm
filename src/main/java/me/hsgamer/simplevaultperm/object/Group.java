@@ -39,9 +39,10 @@ public class Group {
         permissions.put(permission, value);
     }
 
-    public void removePermission(String permission) {
+    public boolean removePermission(String permission) {
         if (permissions != null) {
-            permissions.remove(permission);
+            return permissions.remove(permission);
         }
+        return false;
     }
 }
