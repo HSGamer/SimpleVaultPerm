@@ -144,6 +144,11 @@ public class UserManager {
             }
         }
 
+        Map<String, Boolean> userPermissions = user.getPermissions();
+        if (userPermissions != null) {
+            finalPermissions.putAll(userPermissions);
+        }
+
         String userPrefix = user.getPrefix();
         if (userPrefix != null) {
             finalPrefix = userPrefix;
