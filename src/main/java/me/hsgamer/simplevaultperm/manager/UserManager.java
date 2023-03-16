@@ -148,6 +148,15 @@ public class UserManager {
         return new SnapshotUser(user, finalGroups, finalPermissions, finalPrefix, finalSuffix);
     }
 
+    private void updateSnapshot(User user) {
+        SnapshotUser newSnapshot = makeSnapshot(user);
+        SnapshotUser oldSnapshot = snapshotUserMap.put(user.getUuid(), newSnapshot);
+        if (oldSnapshot != null) {
+            oldSnapshot.clear();
+        }
+        newSnapshot.setup();
+    }
+
     private void onUpdateTick() {
         List<String> updatedGroups = new ArrayList<>();
         groupMap.forEach((groupName, group) -> {
@@ -169,12 +178,7 @@ public class UserManager {
             }
 
             if (user.isUpdateRequire()) {
-                SnapshotUser newSnapshot = makeSnapshot(user);
-                SnapshotUser oldSnapshot = snapshotUserMap.put(user.getUuid(), newSnapshot);
-                if (oldSnapshot != null) {
-                    oldSnapshot.clear();
-                }
-                newSnapshot.setup();
+                updateSnapshot(user);
                 user.setUpdateRequire(false);
                 updated = true;
             }
@@ -184,12 +188,8 @@ public class UserManager {
             needSaving.set(true);
         }
 
-        if (needSaving.get()) {
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (save()) {
-                    needSaving.set(false);
-                }
-            });
+        if (needSaving.get() && save()) {
+            needSaving.set(false);
         }
     }
 }
