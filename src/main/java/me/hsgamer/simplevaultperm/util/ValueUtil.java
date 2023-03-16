@@ -7,7 +7,7 @@ import java.util.*;
 @UtilityClass
 public class ValueUtil {
     public static Map<String, Boolean> toBooleanMap(List<String> list) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new LinkedHashMap<>();
         for (String key : list) {
             if (key.startsWith("-")) {
                 map.put(key.substring(1), false);
@@ -31,7 +31,7 @@ public class ValueUtil {
     }
 
     public static Map<String, Long> toLongMap(Object object) {
-        Map<String, Long> map = new HashMap<>();
+        Map<String, Long> map = new LinkedHashMap<>();
         if (object instanceof Map) {
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
                 try {
