@@ -179,7 +179,11 @@ public class UserManager {
                 user.setUpdateRequire(true);
             }
 
-            if (updatedGroups.stream().anyMatch(user.getGroups()::contains) || updatedGroups.stream().anyMatch(user.getTimedGroups()::containsKey)) {
+            if (
+                    updatedGroups.contains(plugin.getMainConfig().getDefaultGroup())
+                            || updatedGroups.stream().anyMatch(user.getGroups()::contains)
+                            || updatedGroups.stream().anyMatch(user.getTimedGroups()::containsKey)
+            ) {
                 user.setUpdateRequire(true);
             }
 
