@@ -50,7 +50,10 @@ public class User {
     }
 
     public List<String> getFinalGroups() {
-        List<String> finalGroups = new ArrayList<>(groups);
+        List<String> finalGroups = new ArrayList<>();
+        if (groups != null) {
+            finalGroups.addAll(groups);
+        }
         if (timedGroups != null) {
             long currentTime = System.currentTimeMillis();
             timedGroups.forEach((group, time) -> {
