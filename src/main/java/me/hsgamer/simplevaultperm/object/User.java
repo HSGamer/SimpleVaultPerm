@@ -90,11 +90,15 @@ public class User {
         return false;
     }
 
-    public void setTimedGroup(String group, long duration) {
+    public void setTimedGroup(String group, long time, boolean relative) {
         if (timedGroups == null) {
             timedGroups = new HashMap<>();
         }
-        timedGroups.put(group, System.currentTimeMillis() + duration);
+        if (relative) {
+            timedGroups.put(group, System.currentTimeMillis() + time);
+        } else {
+            timedGroups.put(group, time);
+        }
         expiredGroups.remove(group);
     }
 

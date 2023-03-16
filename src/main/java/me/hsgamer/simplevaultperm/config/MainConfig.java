@@ -17,4 +17,6 @@ public interface MainConfig {
     default boolean isSaveOnUpdate() {
         return false;
     }
+
+    void reloadConfig();
 }

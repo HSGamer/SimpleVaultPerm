@@ -101,6 +101,12 @@ public class UserManager {
     public void clear() {
         Optional.ofNullable(updateTask).ifPresent(BukkitTask::cancel);
         save();
+        clearSnapshot();
+    }
+
+    public void clearSnapshot() {
+        snapshotUserMap.forEach((uuid, snapshotUser) -> snapshotUser.clear());
+        snapshotUserMap.clear();
     }
 
     private SnapshotUser makeSnapshot(User user) {
