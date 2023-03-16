@@ -115,7 +115,7 @@ public class UserManager {
         user.setPrefix(finalPrefix);
         user.setSuffix(finalSuffix);
 
-        user.applyPermissions();
+        user.applyAttachment();
     }
 
     private void onUpdateTick() {

@@ -43,7 +43,7 @@ public class User {
         return map;
     }
 
-    public void applyPermissions() {
+    public void applyAttachment() {
         synchronized (lock) {
             if (permissionAttachment != null) {
                 permissionAttachment.remove();
@@ -63,17 +63,12 @@ public class User {
         }
     }
 
-    public void removePermissions() {
+    public void removeAttachment() {
         synchronized (lock) {
             if (permissionAttachment != null) {
                 permissionAttachment.remove();
                 permissionAttachment = null;
             }
-            if (cachedPermissions != null) {
-                cachedPermissions = null;
-            }
-            prefix = null;
-            suffix = null;
         }
     }
 
