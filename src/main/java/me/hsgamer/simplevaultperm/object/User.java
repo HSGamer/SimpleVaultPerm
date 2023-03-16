@@ -76,4 +76,56 @@ public class User {
             suffix = null;
         }
     }
+
+    public List<String> getFinalGroups() {
+        List<String> finalGroups = new ArrayList<>(groups);
+        timedGroups.forEach((group, time) -> {
+            if (time > System.currentTimeMillis()) {
+                finalGroups.add(group);
+            }
+        });
+        return finalGroups;
+    }
+
+    public void setPermission(String permission, boolean value) {
+        if (permissions == null) {
+            permissions = new HashMap<>();
+        }
+        permissions.put(permission, value);
+    }
+
+    public void removePermission(String permission) {
+        if (permissions != null) {
+            permissions.remove(permission);
+        }
+    }
+
+    public void setTimedGroup(String group, long time) {
+        if (timedGroups == null) {
+            timedGroups = new HashMap<>();
+        }
+        timedGroups.put(group, time);
+    }
+
+    public void removeTimedGroup(String group) {
+        if (timedGroups != null) {
+            timedGroups.remove(group);
+        }
+    }
+
+    public boolean clearExpiredTimedGroups() {
+        if (timedGroups == null) {
+            return false;
+        }
+        boolean changed = false;
+        Iterator<Map.Entry<String, Long>> iterator = timedGroups.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Long> entry = iterator.next();
+            if (entry.getValue() < System.currentTimeMillis()) {
+                iterator.remove();
+                changed = true;
+            }
+        }
+        return changed;
+    }
 }
