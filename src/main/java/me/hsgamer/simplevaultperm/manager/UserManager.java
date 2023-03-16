@@ -171,8 +171,8 @@ public class UserManager {
                 updatedGroups.add(groupName);
             }
         });
+        boolean updated = !updatedGroups.isEmpty();
 
-        boolean updated = false;
         for (User user : userMap.values()) {
             List<String> expiredGroups = user.clearExpiredTimedGroups();
             if (!expiredGroups.isEmpty()) {
