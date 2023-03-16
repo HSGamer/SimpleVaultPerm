@@ -104,12 +104,13 @@ public class UserManager {
     }
 
     private SnapshotUser makeSnapshot(User user) {
-        List<String> finalGroups = new ArrayList<>(user.getFinalGroups());
+        List<String> groups = new ArrayList<>(user.getFinalGroups());
         String defaultGroup = plugin.getMainConfig().getDefaultGroup();
-        if (!finalGroups.contains(defaultGroup)) {
-            finalGroups.add(defaultGroup);
+        if (!groups.contains(defaultGroup)) {
+            groups.add(defaultGroup);
         }
 
+        List<String> finalGroups = new ArrayList<>();
         Map<String, Boolean> finalPermissions = new HashMap<>();
         String finalPrefix = "";
         String finalSuffix = "";
@@ -117,7 +118,9 @@ public class UserManager {
         for (Map.Entry<String, Group> entry : groupMap.entrySet()) {
             String groupName = entry.getKey();
             Group group = entry.getValue();
-            if (finalGroups.contains(groupName)) {
+            if (groups.contains(groupName)) {
+                finalGroups.add(groupName);
+
                 finalPermissions.putAll(group.getPermissions());
 
                 String prefix = group.getPrefix();
