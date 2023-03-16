@@ -9,8 +9,8 @@ public interface MainConfig {
     }
 
     @ConfigPath("update-task.interval")
-    default int getUpdateInterval() {
-        return 60;
+    default long getUpdateInterval() {
+        return 0;
     }
 
     @ConfigPath("update-task.save-on-update")
