@@ -3,6 +3,7 @@ package me.hsgamer.simplevaultperm.command;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import me.hsgamer.simplevaultperm.object.User;
+import me.hsgamer.simplevaultperm.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,11 +28,7 @@ public class AddGroupCommand extends AdminCommand {
         String group = args[1];
         long duration = -1;
         if (args.length > 2) {
-            try {
-                duration = Long.parseUnsignedLong(args[2]);
-            } catch (Exception e) {
-                // IGNORED
-            }
+            duration = TimeUtil.toMillis(args[2]);
         }
         boolean relative = false;
         if (args.length > 3) {

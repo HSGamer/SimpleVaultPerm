@@ -191,6 +191,9 @@ public class UserManager {
                 });
                 user.setUpdateRequire(true);
             }
+            if (user.isUpdateRequire()) {
+                updated = true;
+            }
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
