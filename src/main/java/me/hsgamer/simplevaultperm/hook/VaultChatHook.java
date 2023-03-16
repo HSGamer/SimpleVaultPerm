@@ -2,6 +2,7 @@ package me.hsgamer.simplevaultperm.hook;
 
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import me.hsgamer.simplevaultperm.object.Group;
+import me.hsgamer.simplevaultperm.object.SnapshotUser;
 import me.hsgamer.simplevaultperm.object.User;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
@@ -28,9 +29,9 @@ public class VaultChatHook extends Chat {
     }
 
     @SuppressWarnings("deprecation")
-    private User getUser(String player) {
+    private SnapshotUser getUser(String player) {
         OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(player);
-        return plugin.getUserManager().getUser(offlinePlayer.getUniqueId(), false);
+        return plugin.getUserManager().getSnapshotUser(offlinePlayer.getUniqueId(), false);
     }
 
     private Group getGroup(String group, boolean createIfNotExist) {
@@ -39,44 +40,26 @@ public class VaultChatHook extends Chat {
 
     @Override
     public String getPlayerPrefix(String world, String player) {
-        User user = getUser(player);
-        if (user != null) {
-            String prefix = user.getPrefix();
-            if (prefix != null) {
-                return colorize(prefix);
-            }
-        }
-        return "";
+        return colorize(getUser(player).getPrefix());
     }
 
     @Override
     public void setPlayerPrefix(String world, String player, String prefix) {
-        User user = getUser(player);
-        if (user != null) {
-            user.setPrefix(prefix);
-            user.setUpdateRequire(true);
-        }
+        User user = getUser(player).getUser();
+        user.setPrefix(prefix);
+        user.setUpdateRequire(true);
     }
 
     @Override
     public String getPlayerSuffix(String world, String player) {
-        User user = getUser(player);
-        if (user != null) {
-            String suffix = user.getSuffix();
-            if (suffix != null) {
-                return colorize(suffix);
-            }
-        }
-        return "";
+        return colorize(getUser(player).getSuffix());
     }
 
     @Override
     public void setPlayerSuffix(String world, String player, String suffix) {
-        User user = getUser(player);
-        if (user != null) {
-            user.setSuffix(suffix);
-            user.setUpdateRequire(true);
-        }
+        User user = getUser(player).getUser();
+        user.setSuffix(suffix);
+        user.setUpdateRequire(true);
     }
 
     @Override

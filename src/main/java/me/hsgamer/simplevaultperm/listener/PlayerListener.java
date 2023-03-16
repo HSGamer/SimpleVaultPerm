@@ -16,11 +16,11 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
-        plugin.getUserManager().getUser(event.getPlayer().getUniqueId(), true).applyAttachment();
+        plugin.getUserManager().getSnapshotUser(event.getPlayer().getUniqueId(), true).setup();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onQuit(PlayerQuitEvent event) {
-        plugin.getUserManager().getUser(event.getPlayer().getUniqueId(), false).removeAttachment();
+        plugin.getUserManager().getSnapshotUser(event.getPlayer().getUniqueId(), false).clear();
     }
 }

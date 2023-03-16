@@ -2,13 +2,12 @@ package me.hsgamer.simplevaultperm.hook;
 
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import me.hsgamer.simplevaultperm.object.Group;
+import me.hsgamer.simplevaultperm.object.SnapshotUser;
 import me.hsgamer.simplevaultperm.object.User;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.OfflinePlayer;
 
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public class VaultPermissionHook extends Permission {
     private final SimpleVaultPerm plugin;
@@ -33,9 +32,9 @@ public class VaultPermissionHook extends Permission {
     }
 
     @SuppressWarnings("deprecation")
-    private User getUser(String player) {
+    private SnapshotUser getUser(String player) {
         OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(player);
-        return plugin.getUserManager().getUser(offlinePlayer.getUniqueId(), false);
+        return plugin.getUserManager().getSnapshotUser(offlinePlayer.getUniqueId(), false);
     }
 
     private Group getGroup(String group, boolean createIfNotExist) {
@@ -44,12 +43,12 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerHas(String world, String player, String permission) {
-        return Optional.ofNullable(getUser(player)).map(User::getCachedPermissions).map(map -> map.get(permission)).orElse(false);
+        return getUser(player).getPermissions().getOrDefault(permission, false);
     }
 
     @Override
     public boolean playerAdd(String world, String player, String permission) {
-        User user = getUser(player);
+        User user = getUser(player).getUser();
         user.setPermission(permission, true);
         user.setUpdateRequire(true);
         return true;
@@ -57,7 +56,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemove(String world, String player, String permission) {
-        User user = getUser(player);
+        User user = getUser(player).getUser();
         if (user != null && user.removePermission(permission)) {
             user.setUpdateRequire(true);
             return true;
@@ -90,15 +89,12 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerInGroup(String world, String player, String group) {
-        if (group.equals(plugin.getMainConfig().getDefaultGroup())) {
-            return true;
-        }
-        return Optional.ofNullable(getUser(player)).map(User::getCachedGroups).map(set -> set.contains(group)).orElse(false);
+        return getUser(player).getGroups().contains(group);
     }
 
     @Override
     public boolean playerAddGroup(String world, String player, String group) {
-        User user = getUser(player);
+        User user = getUser(player).getUser();
         user.addGroup(group);
         user.setUpdateRequire(true);
         return true;
@@ -106,7 +102,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemoveGroup(String world, String player, String group) {
-        User user = getUser(player);
+        User user = getUser(player).getUser();
         if (user != null && user.removeGroup(group)) {
             user.setUpdateRequire(true);
             return true;
@@ -116,10 +112,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, String player) {
-        Set<String> set = new LinkedHashSet<>();
-        set.add(plugin.getMainConfig().getDefaultGroup());
-        Optional.ofNullable(getUser(player)).map(User::getCachedGroups).ifPresent(set::addAll);
-        return set.toArray(new String[0]);
+        return getUser(player).getGroups().toArray(new String[0]);
     }
 
     @Override

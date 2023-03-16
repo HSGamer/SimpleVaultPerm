@@ -4,10 +4,12 @@ import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.Config;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import me.hsgamer.simplevaultperm.object.Group;
+import me.hsgamer.simplevaultperm.object.SnapshotUser;
 import me.hsgamer.simplevaultperm.object.User;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UserManager {
@@ -18,6 +20,7 @@ public class UserManager {
     private final AtomicBoolean needSaving = new AtomicBoolean(false);
     private final Map<String, Group> groupMap = new LinkedHashMap<>();
     private final Map<UUID, User> userMap = new HashMap<>();
+    private final Map<UUID, SnapshotUser> snapshotUserMap = new ConcurrentHashMap<>();
     private BukkitTask updateTask;
 
     public UserManager(SimpleVaultPerm plugin) {
@@ -35,12 +38,26 @@ public class UserManager {
         return group;
     }
 
-    public User getUser(UUID uuid, boolean forceUpdate) {
-        User user = userMap.computeIfAbsent(uuid, User::new);
-        if (forceUpdate) {
-            updateUser(user, Collections.emptyList());
+    public User getUser(UUID uuid, boolean createIfNotExist) {
+        User user = userMap.get(uuid);
+        if (user == null && createIfNotExist) {
+            user = new User(uuid);
+            userMap.put(uuid, user);
         }
         return user;
+    }
+
+    public SnapshotUser getSnapshotUser(UUID uuid, boolean forceUpdate) {
+        return snapshotUserMap.compute(uuid, (key, value) -> {
+            if (value != null && !forceUpdate) {
+                return value;
+            }
+            User user = getUser(uuid, false);
+            if (user == null) {
+                user = new User(uuid);
+            }
+            return makeSnapshot(user);
+        });
     }
 
     public Collection<String> getGroupNames() {
@@ -86,32 +103,21 @@ public class UserManager {
         save();
     }
 
-    private boolean updateUser(User user, List<String> updatedGroups) {
-        List<String> cachedGroups = user.getCachedGroups();
-        if (cachedGroups != null && cachedGroups.stream().anyMatch(updatedGroups::contains)) {
-            user.setUpdateRequire(true);
-        }
-
-        if (!user.isUpdateRequire()) {
-            return false;
-        }
-
+    private SnapshotUser makeSnapshot(User user) {
         List<String> finalGroups = new ArrayList<>(user.getFinalGroups());
         String defaultGroup = plugin.getMainConfig().getDefaultGroup();
         if (!finalGroups.contains(defaultGroup)) {
             finalGroups.add(defaultGroup);
         }
-        user.setCachedGroups(finalGroups);
 
         Map<String, Boolean> finalPermissions = new HashMap<>();
         String finalPrefix = "";
         String finalSuffix = "";
 
-        List<String> userGroups = user.getCachedGroups();
         for (Map.Entry<String, Group> entry : groupMap.entrySet()) {
             String groupName = entry.getKey();
             Group group = entry.getValue();
-            if (userGroups.contains(groupName)) {
+            if (finalGroups.contains(groupName)) {
                 finalPermissions.putAll(group.getPermissions());
 
                 String prefix = group.getPrefix();
@@ -136,12 +142,7 @@ public class UserManager {
             finalSuffix = userSuffix;
         }
 
-        user.setCachedPermissions(finalPermissions);
-        user.setCachedPrefix(finalPrefix);
-        user.setCachedSuffix(finalSuffix);
-
-        user.setUpdateRequire(false);
-        return true;
+        return new SnapshotUser(user, finalGroups, finalPermissions, finalPrefix, finalSuffix);
     }
 
     private void onUpdateTick() {
@@ -160,8 +161,18 @@ public class UserManager {
                 user.setUpdateRequire(true);
             }
 
-            if (updateUser(user, updatedGroups)) {
-                user.applyAttachment();
+            if (updatedGroups.stream().anyMatch(user.getGroups()::contains) || updatedGroups.stream().anyMatch(user.getTimedGroups()::containsKey)) {
+                user.setUpdateRequire(true);
+            }
+
+            if (user.isUpdateRequire()) {
+                SnapshotUser newSnapshot = makeSnapshot(user);
+                SnapshotUser oldSnapshot = snapshotUserMap.put(user.getUuid(), newSnapshot);
+                if (oldSnapshot != null) {
+                    oldSnapshot.clear();
+                }
+                newSnapshot.setup();
+                user.setUpdateRequire(false);
                 updated = true;
             }
         }
