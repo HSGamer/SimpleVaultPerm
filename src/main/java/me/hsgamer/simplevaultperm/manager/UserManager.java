@@ -3,9 +3,12 @@ package me.hsgamer.simplevaultperm.manager;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.Config;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
+import me.hsgamer.simplevaultperm.event.GroupExpiredEvent;
 import me.hsgamer.simplevaultperm.object.Group;
 import me.hsgamer.simplevaultperm.object.SnapshotUser;
 import me.hsgamer.simplevaultperm.object.User;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -176,13 +179,23 @@ public class UserManager {
         for (User user : userMap.values()) {
             List<String> expiredGroups = user.clearExpiredTimedGroups();
             if (!expiredGroups.isEmpty()) {
+                expiredGroups.forEach(group -> {
+                    if (groupMap.containsKey(group)) {
+                        Bukkit.getPluginManager().callEvent(new GroupExpiredEvent(user, group));
+                    }
+                });
                 user.setUpdateRequire(true);
             }
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            UUID uuid = player.getUniqueId();
+            User user = Optional.ofNullable(getUser(uuid, false)).orElseGet(() -> new User(uuid));
 
             if (
                     updatedGroups.contains(plugin.getMainConfig().getDefaultGroup())
-                            || updatedGroups.stream().anyMatch(user.getGroups()::contains)
-                            || updatedGroups.stream().anyMatch(user.getTimedGroups()::containsKey)
+                            || (user.getGroups() != null && updatedGroups.stream().anyMatch(user.getGroups()::contains))
+                            || (user.getTimedGroups() != null && updatedGroups.stream().anyMatch(user.getTimedGroups()::containsKey))
             ) {
                 user.setUpdateRequire(true);
             }
