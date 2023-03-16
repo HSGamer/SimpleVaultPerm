@@ -1,14 +1,18 @@
 package me.hsgamer.simplevaultperm.object;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.simplevaultperm.util.ValueUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class User {
     private final UUID uuid;
+    private final @Getter(AccessLevel.PACKAGE) List<String> expiredGroups = new ArrayList<>();
     private List<String> groups;
     private Map<String, Long> timedGroups;
     private Map<String, Boolean> permissions;
@@ -30,7 +34,16 @@ public class User {
         Map<String, Object> map = new HashMap<>();
         Optional.ofNullable(groups).ifPresent(value -> map.put("groups", value));
         Optional.ofNullable(permissions).map(ValueUtil::toStringList).ifPresent(value -> map.put("permissions", value));
-        Optional.ofNullable(timedGroups).ifPresent(value -> map.put("timed-groups", value));
+        Optional.ofNullable(timedGroups).map(timeMap -> {
+            Map<String, Object> newMap = new HashMap<>();
+            long currentTime = System.currentTimeMillis();
+            timeMap.forEach((group, time) -> {
+                if (time >= currentTime) {
+                    newMap.put(group, time);
+                }
+            });
+            return newMap;
+        }).ifPresent(value -> map.put("timed-groups", value));
         Optional.ofNullable(prefix).ifPresent(value -> map.put("prefix", value));
         Optional.ofNullable(suffix).ifPresent(value -> map.put("suffix", value));
         return map;
@@ -39,8 +52,9 @@ public class User {
     public List<String> getFinalGroups() {
         List<String> finalGroups = new ArrayList<>(groups);
         if (timedGroups != null) {
+            long currentTime = System.currentTimeMillis();
             timedGroups.forEach((group, time) -> {
-                if (time > System.currentTimeMillis()) {
+                if (time >= currentTime) {
                     finalGroups.add(group);
                 }
             });
@@ -81,6 +95,7 @@ public class User {
             timedGroups = new HashMap<>();
         }
         timedGroups.put(group, System.currentTimeMillis() + duration);
+        expiredGroups.remove(group);
     }
 
     public boolean removeTimedGroup(String group) {
@@ -99,13 +114,13 @@ public class User {
         if (timedGroups == null) {
             return Collections.emptyList();
         }
-        List<String> expiredGroups = new ArrayList<>();
-        timedGroups.forEach((group, time) -> {
-            if (time <= System.currentTimeMillis()) {
-                expiredGroups.add(group);
-            }
-        });
-        expiredGroups.forEach(timedGroups::remove);
+        long currentTime = System.currentTimeMillis();
+        List<String> lastExpiredGroups = timedGroups.entrySet().stream()
+                .filter(entry -> entry.getValue() < currentTime)
+                .map(Map.Entry::getKey)
+                .filter(group -> !expiredGroups.contains(group))
+                .collect(Collectors.toList());
+        expiredGroups.addAll(lastExpiredGroups);
         return expiredGroups;
     }
 }
