@@ -11,13 +11,13 @@ import java.util.Optional;
 
 @Data
 public class Group {
-    private final String name;
     private String prefix;
     private String suffix;
     private Map<String, Boolean> permissions;
+    private boolean updateRequire;
 
-    public static Group fromMap(String name, Map<String, Object> map) {
-        Group group = new Group(name);
+    public static Group fromMap(Map<String, Object> map) {
+        Group group = new Group();
         Optional.ofNullable(map.get("prefix")).map(Objects::toString).ifPresent(group::setPrefix);
         Optional.ofNullable(map.get("suffix")).map(Objects::toString).ifPresent(group::setSuffix);
         Optional.ofNullable(map.get("permissions")).map(CollectionUtils::createStringListFromObject).map(ValueUtil::toBooleanMap).ifPresent(group::setPermissions);

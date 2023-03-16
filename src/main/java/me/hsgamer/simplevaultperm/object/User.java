@@ -21,6 +21,7 @@ public class User {
     private Map<String, Boolean> permissions;
 
     // Cached data
+    private boolean updateRequire;
     private PermissionAttachment permissionAttachment;
     private Map<String, Boolean> cachedPermissions;
     private String prefix;
@@ -51,7 +52,7 @@ public class User {
             Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
             Player player = plugin.getServer().getPlayer(uuid);
             if (player == null) {
-                throw new IllegalStateException("Player is not online");
+                return;
             }
 
             if (cachedPermissions != null) {
@@ -69,7 +70,6 @@ public class User {
                 permissionAttachment = null;
             }
             if (cachedPermissions != null) {
-                cachedPermissions.clear();
                 cachedPermissions = null;
             }
             prefix = null;
@@ -100,11 +100,11 @@ public class User {
         }
     }
 
-    public void setTimedGroup(String group, long time) {
+    public void setTimedGroup(String group, long duration) {
         if (timedGroups == null) {
             timedGroups = new HashMap<>();
         }
-        timedGroups.put(group, time);
+        timedGroups.put(group, System.currentTimeMillis() + duration);
     }
 
     public void removeTimedGroup(String group) {
