@@ -6,6 +6,7 @@ import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.proxy.ConfigGenerator;
 import me.hsgamer.simplevaultperm.config.MainConfig;
 import me.hsgamer.simplevaultperm.config.MessageConfig;
+import me.hsgamer.simplevaultperm.listener.PlayerListener;
 import me.hsgamer.simplevaultperm.manager.UserManager;
 
 @Getter
@@ -17,6 +18,8 @@ public final class SimpleVaultPerm extends BasePlugin {
     @Override
     public void enable() {
         userManager.setup();
+
+        registerListener(new PlayerListener(this));
     }
 
     @Override

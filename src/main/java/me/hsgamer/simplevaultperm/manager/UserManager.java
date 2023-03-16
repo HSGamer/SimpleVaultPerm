@@ -35,11 +35,10 @@ public class UserManager {
         return group;
     }
 
-    public User getUser(UUID uuid, boolean createIfNotExist) {
-        User user = userMap.get(uuid);
-        if (user == null && createIfNotExist) {
-            user = new User(uuid);
-            userMap.put(uuid, user);
+    public User getUser(UUID uuid, boolean forceUpdate) {
+        User user = userMap.computeIfAbsent(uuid, User::new);
+        if (forceUpdate) {
+            updateUser(user);
         }
         return user;
     }
@@ -102,11 +101,15 @@ public class UserManager {
             Group group = entry.getValue();
             if (userGroups.contains(groupName)) {
                 finalPermissions.putAll(group.getPermissions());
-                if (finalPrefix.isEmpty()) {
-                    finalPrefix = group.getPrefix();
+
+                String prefix = group.getPrefix();
+                if (prefix != null) {
+                    finalPrefix = prefix;
                 }
-                if (finalSuffix.isEmpty()) {
-                    finalSuffix = group.getSuffix();
+
+                String suffix = group.getSuffix();
+                if (suffix != null) {
+                    finalSuffix = suffix;
                 }
             }
         }
@@ -114,8 +117,6 @@ public class UserManager {
         user.setCachedPermissions(finalPermissions);
         user.setPrefix(finalPrefix);
         user.setSuffix(finalSuffix);
-
-        user.applyAttachment();
     }
 
     private void onUpdateTick() {
@@ -141,6 +142,7 @@ public class UserManager {
             if (user.isUpdateRequire()) {
                 user.setUpdateRequire(false);
                 updateUser(user);
+                user.applyAttachment();
                 updated = true;
             }
         }
