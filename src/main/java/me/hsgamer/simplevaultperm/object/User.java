@@ -32,8 +32,8 @@ public class User {
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        Optional.ofNullable(groups).ifPresent(value -> map.put("groups", value));
-        Optional.ofNullable(permissions).map(ValueUtil::toStringList).ifPresent(value -> map.put("permissions", value));
+        Optional.ofNullable(groups).filter(v -> !v.isEmpty()).ifPresent(value -> map.put("groups", value));
+        Optional.ofNullable(permissions).map(ValueUtil::toStringList).filter(v -> !v.isEmpty()).ifPresent(value -> map.put("permissions", value));
         Optional.ofNullable(timedGroups).map(timeMap -> {
             Map<String, Object> newMap = new HashMap<>();
             long currentTime = System.currentTimeMillis();
@@ -43,7 +43,7 @@ public class User {
                 }
             });
             return newMap;
-        }).ifPresent(value -> map.put("timed-groups", value));
+        }).filter(v -> !v.isEmpty()).ifPresent(value -> map.put("timed-groups", value));
         Optional.ofNullable(prefix).ifPresent(value -> map.put("prefix", value));
         Optional.ofNullable(suffix).ifPresent(value -> map.put("suffix", value));
         return map;

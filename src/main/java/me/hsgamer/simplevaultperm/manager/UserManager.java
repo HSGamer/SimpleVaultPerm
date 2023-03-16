@@ -90,11 +90,21 @@ public class UserManager {
         }
 
         groupConfig.getKeys(false).forEach(groupConfig::remove);
-        groupMap.forEach((groupName, group) -> groupConfig.set(groupName, group.toMap()));
+        groupMap.forEach((groupName, group) -> {
+            Map<String, Object> map = group.toMap();
+            if (!map.isEmpty()) {
+                groupConfig.set(groupName, map);
+            }
+        });
         groupConfig.save();
 
         userConfig.getKeys(false).forEach(userConfig::remove);
-        userMap.forEach((uuid, user) -> userConfig.set(uuid.toString(), user.toMap()));
+        userMap.forEach((uuid, user) -> {
+            Map<String, Object> map = user.toMap();
+            if (!map.isEmpty()) {
+                userConfig.set(uuid.toString(), map);
+            }
+        });
         userConfig.save();
 
         isSaving.set(false);

@@ -28,7 +28,7 @@ public class Group {
         Map<String, Object> map = new HashMap<>();
         Optional.ofNullable(prefix).ifPresent(value -> map.put("prefix", value));
         Optional.ofNullable(suffix).ifPresent(value -> map.put("suffix", value));
-        Optional.ofNullable(permissions).map(ValueUtil::toStringList).ifPresent(value -> map.put("permissions", value));
+        Optional.ofNullable(permissions).map(ValueUtil::toStringList).filter(v -> !v.isEmpty()).ifPresent(value -> map.put("permissions", value));
         return map;
     }
 
