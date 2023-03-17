@@ -1,7 +1,8 @@
 package me.hsgamer.simplevaultperm.util;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang.time.DurationFormatUtils;
+
+import java.util.concurrent.TimeUnit;
 
 @UtilityClass
 public class TimeUtil {
@@ -42,6 +43,10 @@ public class TimeUtil {
     }
 
     public static String displayDuration(long time) {
-        return DurationFormatUtils.formatDuration(time, "HH:mm:ss", true);
+        long hours = TimeUnit.MILLISECONDS.toHours(time);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60;
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 }
