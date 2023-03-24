@@ -54,9 +54,7 @@ public final class SimpleVaultPerm extends BasePlugin {
             registerProvider(Chat.class, chatHook, ServicePriority.High);
         }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            PlaceholderHook placeholderHook = new PlaceholderHook(this);
-            placeholderHook.register();
-            addDisableFunction(placeholderHook::unregister);
+            new PlaceholderHook(this).register();
         }
     }
 

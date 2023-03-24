@@ -42,6 +42,15 @@ public class PlaceholderHook extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean register() {
+        boolean result = super.register();
+        if (result) {
+            plugin.addDisableFunction(this::unregister);
+        }
+        return result;
+    }
+
+    @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
         if (player == null) {
             return null;
