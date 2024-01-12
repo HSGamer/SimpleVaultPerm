@@ -8,7 +8,7 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.OfflinePlayer;
 
-import static me.hsgamer.hscore.bukkit.utils.MessageUtils.colorize;
+import static me.hsgamer.hscore.bukkit.utils.ColorUtils.colorize;
 
 public class VaultChatHook extends Chat {
     private final SimpleVaultPerm plugin;

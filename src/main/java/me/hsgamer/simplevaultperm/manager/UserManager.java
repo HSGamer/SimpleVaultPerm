@@ -2,6 +2,7 @@ package me.hsgamer.simplevaultperm.manager;
 
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.Config;
+import me.hsgamer.hscore.config.PathString;
 import me.hsgamer.simplevaultperm.SimpleVaultPerm;
 import me.hsgamer.simplevaultperm.event.GroupExpiredEvent;
 import me.hsgamer.simplevaultperm.object.Group;
@@ -71,12 +72,13 @@ public class UserManager {
         groupConfig.setup();
         userConfig.setup();
 
-        groupConfig.getKeys(false).forEach(groupName -> {
-            Group group = Group.fromMap(groupConfig.getNormalizedValues(groupName, false));
+        groupConfig.getKeys(false).forEach(groupPath -> {
+            String groupName = PathString.toPath(groupPath);
+            Group group = Group.fromMap(PathString.toPathMap(groupConfig.getNormalizedValues(groupPath, false)));
             groupMap.put(groupName, group);
         });
-        userConfig.getKeys(false).forEach(uuidKey -> {
-            User user = User.fromMap(UUID.fromString(uuidKey), userConfig.getNormalizedValues(uuidKey, false));
+        userConfig.getKeys(false).forEach(uuidPath -> {
+            User user = User.fromMap(UUID.fromString(PathString.toPath(uuidPath)), PathString.toPathMap(userConfig.getNormalizedValues(uuidPath, false)));
             userMap.put(user.getUuid(), user);
         });
 
@@ -93,7 +95,7 @@ public class UserManager {
         groupMap.forEach((groupName, group) -> {
             Map<String, Object> map = group.toMap();
             if (!map.isEmpty()) {
-                groupConfig.set(groupName, map);
+                groupConfig.set(new PathString(groupName), map);
             }
         });
         groupConfig.save();
@@ -102,7 +104,7 @@ public class UserManager {
         userMap.forEach((uuid, user) -> {
             Map<String, Object> map = user.toMap();
             if (!map.isEmpty()) {
-                userConfig.set(uuid.toString(), map);
+                userConfig.set(new PathString(uuid.toString()), map);
             }
         });
         userConfig.save();
