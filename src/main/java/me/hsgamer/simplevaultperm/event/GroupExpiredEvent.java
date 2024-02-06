@@ -1,9 +1,11 @@
 package me.hsgamer.simplevaultperm.event;
 
+import lombok.Getter;
 import me.hsgamer.simplevaultperm.object.User;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+@Getter
 public class GroupExpiredEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
     private final User user;
@@ -24,11 +26,4 @@ public class GroupExpiredEvent extends Event {
         return getHandlerList();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public String getGroup() {
-        return group;
-    }
 }
